@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>VG-TTS: Visually Grounded Unified Text-to-Speech Synthesis</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #172033;
+      line-height: 1.6;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 45px 25px 40px;
+      background: linear-gradient(135deg, #edcfff 0%, #ffffff 55%, #fdfdfd 100%);
+      border-bottom: 1px solid #e4eaf2;
+    }
+
+   
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1550px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 7px 16px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid #dce7f2;
+      color: #087ea4;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 22px;
+      box-shadow: 0 5px 18px rgba(20, 40, 70, 0.05);
+    }
+
+    .hero h1 {
+        margin: 0;
+        font-size: 38px;
+        line-height: 1.08;
+        letter-spacing: -1.5px;
+        font-weight: 800;
+        color: #111827;
+        padding: 30px;
+        }
+
+        .hero h1 span {
+        font-size: 44px; 
+        color: #fd3b00;
+        }
+
+    .hero-subtitle {
+      max-width: 850px;
+      margin: 22px auto 0;
+      font-size: 20px;
+      color: #5c687a;
+    }
+
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 21px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #111827;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(17, 24, 39, 0.18);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #263244;
+      border: 1px solid #d7e0ea;
+    }
+
+    .btn-secondary:hover {
+      border-color: #01b8ef;
+      color: #008cb9;
+    }
+
+
+    .container {
+      width: min(1180px, calc(100% - 40px));
+      margin: auto;
+    }
+
+    .section {
+      margin: 55px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 950px;
+      margin: 0 auto 32px;
+    }
+
+    .section-label {
+      display: inline-block;
+      color: #0795bf;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.3px;
+      margin-bottom: 7px;
+    }
+
+    .section h2 {
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.2;
+      color: #182233;
+      letter-spacing: -0.7px;
+    }
+
+    .section-description {
+      margin: 12px auto 0;
+      color: #687487;
+      font-size: 16px;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+      padding: 30px;
+      background: white;
+      border: 1px solid #e4eaf1;
+      border-radius: 20px;
+      box-shadow: 0 10px 35px rgba(20, 40, 70, 0.06);
+    }
+
+    .pipeline-card {
+      text-align: center;
+      padding: 25px 15px;
+    }
+
+    .pipeline-icon {
+      width: 62px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      border-radius: 16px;
+      background: #e9f9fe;
+      font-size: 28px;
+    }
+
+    .pipeline-card h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .pipeline-card p {
+      margin: 5px 0 0;
+      color: #748095;
+      font-size: 14px;
+    }
+
+    .arrow {
+      color: #01a9dc;
+      font-size: 28px;
+      font-weight: 700;
+    }
+ 
+
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .model-card {
+      background: white;
+      border: 1px solid #e3e9f1;
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 8px 28px rgba(20, 40, 70, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .model-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px rgba(20, 40, 70, 0.09);
+    }
+
+    .model-number {
+      font-size: 12px;
+      font-weight: 800;
+      color: #01a9dc;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .model-card h3 {
+      margin: 8px 0 5px;
+      font-size: 21px;
+    }
+
+    .model-card p {
+      margin: 0;
+      color: #697689;
+      font-size: 14px;
+    }
+
+    
+    
+ 
+
+    .demo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .demo-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 7px 25px rgba(20, 40, 70, 0.05);
+    }
+
+    .demo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    .example-number {
+      color: #079bc6;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .sentence {
+      font-size: 17px;
+      font-weight: 600;
+      color: #293548;
+      margin-bottom: 22px;
+    }
+
+    .audio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .audio-box {
+      border: 1px solid #e4e9ef;
+      border-radius: 13px;
+      padding: 14px;
+      background: #f9fbfd;
+    }
+
+    .audio-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 9px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #344054;
+    }
+
+    .audio-label span {
+      font-size: 11px;
+      color: #8a96a7;
+      font-weight: 600;
+    }
+
+    audio {
+      width: 100%;
+      height: 38px;
+    }
+
+ 
+
+    .dataset {
+      margin-bottom: 28px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 7px 25px rgba(20, 40, 70, 0.045);
+    }
+
+    .dataset-header {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 22px;
+    }
+
+    .dataset-icon {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #edf9fd;
+      border-radius: 12px;
+      font-size: 21px;
+    }
+
+    .dataset-header h3 {
+      margin: 0;
+      font-size: 21px;
+    }
+
+    .dataset-header p {
+      margin: 1px 0 0;
+      color: #7a8698;
+      font-size: 13px;
+    }
+
+    .ood-card {
+      padding: 18px 0;
+      border-top: 1px solid #edf0f4;
+    }
+
+    .ood-card:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .ood-sentence {
+      font-size: 15px;
+      font-weight: 600;
+      color: #344054;
+      margin-bottom: 13px;
+    }
+
+    .ood-audio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+  
+ 
+    footer {
+      margin-top: 70px;
+      padding: 30px 20px;
+      border-top: 1px solid #e3e8ef;
+      text-align: center;
+      color: #ff3c00;
+      font-size: 13px;
+    }
+
+ 
+
+    @media (max-width: 850px) {
+
+      .pipeline {
+        grid-template-columns: 1fr;
+      }
+
+      .arrow {
+        transform: rotate(90deg);
+        text-align: center;
+      }
+
+      .model-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .audio-grid,
+      .ood-audio-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 65px 20px;
+      }
+
+      .hero h1 {
+        letter-spacing: -1px;
+      }
+    }
+
+    @media (max-width: 550px) {
+
+      .container {
+        width: min(100% - 24px, 1180px);
+      }
+
+      .section {
+        margin: 40px 0;
+      }
+
+      .section h2 {
+        font-size: 26px;
+      }
+
+      .demo-card,
+      .dataset {
+        padding: 18px;
+      }
+
+      .sentence {
+        font-size: 15px;
+      }
+
+      .takeaway {
+        padding: 27px 20px;
+      }
+    }
+  </style>
+</head>
+
+
+<body>
+ 
+
+<header class="hero">
+  <div class="hero-content">
+      <h1>
+      <span>VG-TTS:</span> Visually Grounded Unified Text-to-Speech Synthesis
+    </h1>
+    <div class="hero-buttons">
+      <a href="#main-demo" class="btn btn-primary">In-Domain Evaluation</a>
+      <a href="#ood" class="btn btn-secondary">Out-of-Domain Evaluation</a>
+    </div>
+  </div>
+</header>
+
+
+<main class="container">
+ 
+<section class="section" id="main-demo">
+
+  <div class="section-header">
+    <div class="section-label">Main Evaluation</div>
+    <h2>
+     Speech Synthesis Comparison: Text-TTS, Pixel-TTS and VG-TTS
+    </h2>
+
+    <p class="section-description">
+    Each example compares the synthesized speech produced by Models for the same input sentence.
+    </p>
+  </div>
+
+    <div class="demo-card"> 
+      <div class="demo-header">
+        <div class="example-number">Example 01</div>
+      </div>
+
+      <div class="sentence">He began a confused complaint against the wizard, who had vanished behind the curtain on the left. </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">
+            Text-TTS
+            <span>Baseline</span>
+          </div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/61-70968-0000.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">
+            Pixel-TTS
+            <span>Baseline</span>
+          </div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/61-70968-0000.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">
+            VG-TTS
+            <span>Proposed</span>
+          </div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/61-70968-0000.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Example 02 -->
+
+    <div class="demo-card">
+
+      <div class="demo-header">
+        <div class="example-number">Example 02</div>
+      </div>
+
+      <div class="sentence">
+       Also, a popular contrivance whereby love making may be suspended but not stopped during the picnic season. 
+      </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/121-121726-0000.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/121-121726-0000.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS <span>Proposed</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/121-121726-0000.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Example 03 -->
+
+    <div class="demo-card">
+
+      <div class="demo-header">
+        <div class="example-number">Example 03</div>
+      </div>
+
+      <div class="sentence">
+       Saturday, august fifteenth. - The sea unbroken all round. No land in sight.
+      </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/260-123286-0000.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/260-123286-0000.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS <span>Proposed</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/260-123286-0000.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Example 04 -->
+
+    <div class="demo-card">
+
+      <div class="demo-header">
+        <div class="example-number">Example 04</div>
+      </div>
+
+      <div class="sentence">
+       I did not wrong myself so, but I placed A wrong on thee.
+      </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/908-31957-0002.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/908-31957-0002.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS <span>Proposed</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/908-31957-0002.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Example 05 -->
+
+    <div class="demo-card">
+
+      <div class="demo-header">
+        <div class="example-number">Example 05</div>
+      </div>
+
+      <div class="sentence">
+       One day, when the boy was sent by his grandfather with a message to a relation, he passed along a street in which there was a great concourse of horsemen. 
+      </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/5639-40744-0024.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/5639-40744-0024.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS <span>Proposed</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/5639-40744-0024.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Example 06 -->
+
+    <div class="demo-card">
+
+      <div class="demo-header">
+        <div class="example-number">Example 06</div>
+      </div>
+
+      <div class="sentence">
+     It was a serious crime indeed, mister Watson told them, and Tom Gates bade fair to serve a lengthy term in state's prison as a consequence of his rash act.
+      </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/6829-68769-0001.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/6829-68769-0001.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS <span>Proposed</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/6829-68769-0001.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Example 07 -->
+
+    <div class="demo-card">
+
+      <div class="demo-header">
+        <div class="example-number">Example 07</div>
+      </div>
+
+      <div class="sentence">
+       Under ordinary conditions Reynolds was sure to be elected, but the Committee proposed to sacrifice him in order to elect Hopkins. 
+      </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/6829-68771-0004.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/6829-68771-0004.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS <span>Proposed</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/6829-68771-0004.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Example 08 -->
+
+    <div class="demo-card">
+
+      <div class="demo-header">
+        <div class="example-number">Example 08</div>
+      </div>
+
+      <div class="sentence">
+       But it is the cigarette which chiefly has brought the modern drama to its present state of perfection.
+      </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/7176-92135-0044.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/7176-92135-0044.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS <span>Proposed</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/7176-92135-0044.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Example 09 -->
+
+    <div class="demo-card">
+
+      <div class="demo-header">
+        <div class="example-number">Example 09</div>
+      </div>
+
+      <div class="sentence">
+       Of this party, Edward, a boy of seventeen, called forth much sympathy; he too was claimed by Hollan.
+      </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/8463-287645-0003.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/8463-287645-0003.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS <span>Proposed</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/8463-287645-0003.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Example 10 -->
+
+    <div class="demo-card">
+
+      <div class="demo-header">
+        <div class="example-number">Example 10</div>
+      </div>
+
+      <div class="sentence">
+       That evening Trot gave a grand ball in the palace, to which the most important of the Pinkies and the Blueskins were invited.
+      </div>
+
+      <div class="audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/TextTTS-Model/librispeech-pc/8555-284449-0019.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/PixelTTS-Model/librispeech-pc/8555-284449-0019.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS <span>Proposed</span></div>
+          <audio controls>
+            <source
+              src="demo_audios/VGTTS-Model/librispeech-pc/8555-284449-0019.wav"
+              type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!--OOD-->
+
+<section class="section" id="ood">
+
+  <div class="section-header">
+
+    <div class="section-label">Generalization</div>
+
+    <h2>
+      Out-of-Domain Evaluation
+    </h2>
+
+    <p class="section-description">
+     The following speech samples compare Text-TTS, Pixel-TTS and VG-TTS on out-of-domain datasets, including SEED-TTS-EN , LJSpeech and L2-ARCTIC.
+    </p>
+
+  </div>
+
+
+  <!-- SEED-TTS -->
+
+  <div class="dataset">
+
+    <div class="dataset-header">
+
+      <div>
+        <h3>SEED-TTS-EN</h3>
+        <p>English out-of-domain evaluation</p>
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+      The hunter was alerted by the sound of rustling vegetation behind her.
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/SEED-TTS-EN/common_voice_en_79862-common_voice_en_79860.wav" type="audio/wav">
+          </audio>       
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/SEED-TTS-EN/common_voice_en_79862-common_voice_en_79860.wav" type="audio/wav">
+          </audio>       
+        </div>
+                                demo_audios/PixelTTS-Model/SEED-TTS-EN
+        <div class="audio-box">
+        <div class="audio-label">VG-TTS <span>Proposed</span></div>
+    
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/SEED-TTS-EN/common_voice_en_79862-common_voice_en_79860.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+       what is the forecast for California for rain
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/SEED-TTS-EN/common_voice_en_167249-common_voice_en_167246.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/SEED-TTS-EN/common_voice_en_167249-common_voice_en_167246.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/SEED-TTS-EN/common_voice_en_167249-common_voice_en_167246.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+       The "smoking pipe" shape was designed to increase the quantity of available ink.
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/SEED-TTS-EN/common_voice_en_22925816-common_voice_en_22925815.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/SEED-TTS-EN/common_voice_en_22925816-common_voice_en_22925815.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/SEED-TTS-EN/common_voice_en_22925816-common_voice_en_22925815.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+        Some large firms or specialized jobs require a master's degree.
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/SEED-TTS-EN/common_voice_en_23728823-common_voice_en_23728827.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/SEED-TTS-EN/common_voice_en_23728823-common_voice_en_23728827.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/SEED-TTS-EN/common_voice_en_23728823-common_voice_en_23728827.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+        He has also authored a number of books on the subject.
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/SEED-TTS-EN/common_voice_en_25190404-common_voice_en_25190411.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/SEED-TTS-EN/common_voice_en_25190404-common_voice_en_25190411.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/SEED-TTS-EN/common_voice_en_25190404-common_voice_en_25190411.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- LJSPEECH -->
+
+  <div class="dataset">
+
+    <div class="dataset-header">
+ 
+
+      <div>
+        <h3>LJSpeech</h3>
+        <p>Single-speaker out-of-domain evaluation</p>
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+        yet their type is artistically on a much lower level than Jenson's, and in fact
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/LJSpeech/LJ001-0052.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/LJSpeech/LJ001-0052.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/LJSpeech/LJ001-0052.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+       directly under the chapel, in which there were three cells, used either for the confinement of disorderly and refractory prisoners
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/LJSpeech/LJ002-0064.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/LJSpeech/LJ002-0064.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/LJSpeech/LJ002-0064.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+       he bread was issued every alternate day; and while some prisoners often ate their whole allowance at once
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/LJSpeech/LJ002-0320.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/LJSpeech/LJ002-0320.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/LJSpeech/LJ002-0320.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- L2-ARCTIC -->
+
+  <div class="dataset">
+
+    <div class="dataset-header">
+
+       
+
+      <div>
+        <h3>L2-ARCTIC</h3>
+       <p>English speech spoken by non-native speakers</p>
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+       Not at this particular case Tom apologized Whittemore
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/L2Arctic/ABA_arctic_a0002.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/L2Arctic/ABA_arctic_a0002.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/L2Arctic/ABA_arctic_a0002.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+       Yet in accordance with Ernest's test of truth it worked
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/L2Arctic/BWC_arctic_a0509.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/L2Arctic/BWC_arctic_a0509.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/L2Arctic/BWC_arctic_a0509.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+      Nevertheless we found ourselves once more in the high seat of abundance
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/L2Arctic/HJK_arctic_a0430.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/L2Arctic/HJK_arctic_a0430.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/L2Arctic/HJK_arctic_a0430.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+       I just do appreciate it without being able to express my feelings
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/L2Arctic/LXC_arctic_a0368.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/L2Arctic/LXC_arctic_a0368.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/L2Arctic/LXC_arctic_a0368.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ood-card">
+
+      <div class="ood-sentence">
+        Red Eye swung back and forth on the branch farther down
+      </div>
+
+      <div class="ood-audio-grid">
+
+        <div class="audio-box">
+          <div class="audio-label">Text-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/TextTTS-Model/L2Arctic/MBMPS_arctic_a0335.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Pixel-TTS <span>Baseline</span></div>
+          <audio controls>
+            <source src="demo_audios/PixelTTS-Model/L2Arctic/MBMPS_arctic_a0335.wav" type="audio/wav">
+          </audio>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">VG-TTS<span>Proposed</span></div>
+          <audio controls>
+            <source src="demo_audios/VGTTS-Model/L2Arctic/MBMPS_arctic_a0335.wav" type="audio/wav">
+          </audio>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+ 
+
+</main>
+
+
+<footer>
+  VG-TTS · Visually Grounded Unified Text-to-Speech Synthesis
+</footer>
+
+
+</body>
+</html>
