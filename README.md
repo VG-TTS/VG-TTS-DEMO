@@ -1,5 +1,3 @@
-# VG-TTS: Visually Grounded Unified Text-to-Speech Synthesis
-
 Official demo page for the paper:
 
 **VG-TTS: Visually Grounded Unified Text-to-Speech Synthesis**
